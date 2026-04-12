@@ -1,0 +1,53 @@
+### Test Semantic Cache Demo
+### Make sure you have uploaded a document first!
+
+### 1. Get initial cache stats
+GET http://localhost:3001/query/cache/stats
+
+###
+
+### 2. First query (cache miss - will call OpenAI)
+POST http://localhost:3001/query
+Content-Type: application/json
+
+{
+  "question": "What is artificial intelligence?",
+  "topK": 5
+}
+
+###
+
+### 3. Exact same query (exact match cache hit)
+POST http://localhost:3001/query
+Content-Type: application/json
+
+{
+  "question": "What is artificial intelligence?",
+  "topK": 5
+}
+
+###
+
+### 4. Paraphrased query (semantic match cache hit)
+POST http://localhost:3001/query
+Content-Type: application/json
+
+{
+  "question": "Can you explain what AI is?",
+  "topK": 5
+}
+
+###
+
+### 5. Check cache stats after queries
+GET http://localhost:3001/query/cache/stats
+
+###
+
+### 6. Clear cache
+POST http://localhost:3001/query/cache/clear
+
+###
+
+### 7. Verify cache is cleared
+GET http://localhost:3001/query/cache/stats

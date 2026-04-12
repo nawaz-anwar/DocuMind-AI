@@ -1,0 +1,17 @@
+DocuMind AI Test Document
+
+This is a sample document created for testing a GenAI-powered document search system.
+
+The purpose of this document is to validate the following features:
+1. Document upload and parsing
+2. Text chunking and embedding generation
+3. Semantic search using vector similarity
+4. AI-powered question answering
+
+Key Concepts:
+- Artificial Intelligence enables machines to simulate human intelligence.
+- Retrieval-Augmented Generation (RAG) combines search with language models.
+- Embeddings convert text into numerical vectors for similarity comparison.
+
+Conclusion:
+This document is intentionally simple to help test the system functionality.
