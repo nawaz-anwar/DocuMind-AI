@@ -2,7 +2,8 @@
   "name": "backend",
   "version": "1.0.0",
   "scripts": {
-    "build": "nest build",
+    "build": "pnpm run build:packages && nest build",
+    "build:packages": "cd ../../packages/shared-types && pnpm build && cd ../utils && pnpm build",
     "dev": "nest start --watch",
     "start": "node dist/main",
     "start:prod": "node dist/main",

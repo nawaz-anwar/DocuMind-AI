@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "apps/backend/package.json",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": [
+          "apps/backend/**",
+          "packages/**"
+        ]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "apps/backend/src/main.ts"
+    }
+  ],
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm build:backend",
+  "outputDirectory": "apps/backend/dist"
+}
