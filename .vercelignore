@@ -1,0 +1,9 @@
+node_modules
+.git
+*.log
+.env.local
+.DS_Store
+apps/frontend
+infra
+*.md
+!README.md
