@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "scripts": {
-    "build": "cd ../.. && pnpm --filter @documind/shared-types build && pnpm --filter @documind/utils build && cd apps/backend && nest build",
+    "build": "nest build",
     "build:packages": "cd ../../packages/shared-types && pnpm build && cd ../utils && pnpm build",
     "dev": "nest start --watch",
     "start": "node dist/main",

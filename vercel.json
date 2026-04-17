@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "cd ../.. && pnpm build:backend",
-  "installCommand": "pnpm install",
+  "buildCommand": "pnpm --filter @documind/shared-types build && pnpm --filter @documind/utils build && pnpm --filter backend build",
+  "installCommand": "pnpm install --frozen-lockfile",
   "framework": null,
   "outputDirectory": "apps/backend/dist"
 }

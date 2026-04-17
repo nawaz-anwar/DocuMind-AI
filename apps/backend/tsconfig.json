@@ -19,8 +19,8 @@
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
     "paths": {
-      "@documind/shared-types": ["../../packages/shared-types/src"],
-      "@documind/utils": ["../../packages/utils/src"]
+      "@documind/shared-types": ["../../packages/shared-types/dist"],
+      "@documind/utils": ["../../packages/utils/dist"]
     }
   },
   "include": ["src/**/*"],

@@ -501,46 +501,144 @@ Deploy the `apps/frontend/dist` folder to any static hosting service (Vercel, Ne
 
 ### Backend Deployment
 
-#### Environment Variables
-Ensure all required environment variables are set:
-- `OPENAI_API_KEY` (required)
-- `GEMINI_API_KEY` (optional)
-- `PORT`
-- `MAX_FILE_SIZE`
-- `CACHE_MAX_SIZE`
-- `CACHE_TTL_HOURS`
-- `CACHE_SIMILARITY_THRESHOLD`
+#### Recommended: Railway (Best for Monorepos)
 
-#### Docker (Optional)
+Railway handles monorepos better than Vercel for Node.js backends.
+
+1. **Install Railway CLI**
+```bash
+npm i -g @railway/cli
+```
+
+2. **Login and Initialize**
+```bash
+railway login
+railway init
+```
+
+3. **Set Environment Variables**
+```bash
+railway variables set OPENAI_API_KEY=your_key_here
+railway variables set GEMINI_API_KEY=your_key_here
+railway variables set PORT=3001
+railway variables set CACHE_MAX_SIZE=100
+railway variables set CACHE_TTL_HOURS=1
+railway variables set CACHE_SIMILARITY_THRESHOLD=0.9
+```
+
+4. **Deploy**
+```bash
+railway up
+```
+
+#### Alternative: Vercel
+
+If deploying to Vercel, use the provided configuration:
+
+1. **Push to Git**
+```bash
+git add .
+git commit -m "Deploy to Vercel"
+git push
+```
+
+2. **Configure Vercel Project**
+   - Import your repository
+   - Root Directory: `.` (leave as root)
+   - Framework: Other
+   - Build Command: `pnpm build:backend`
+   - Output Directory: `apps/backend/dist`
+   - Install Command: `pnpm install`
+
+3. **Add Environment Variables** (in Vercel Dashboard)
+   - `OPENAI_API_KEY`
+   - `GEMINI_API_KEY` (optional)
+   - `PORT=3001`
+   - `CACHE_MAX_SIZE=100`
+   - `CACHE_TTL_HOURS=1`
+   - `CACHE_SIMILARITY_THRESHOLD=0.9`
+
+4. **Deploy**
+
+**Note**: See `VERCEL_DEPLOYMENT.md` for detailed troubleshooting.
+
+#### Alternative: Render
+
+1. **Create New Web Service**
+   - Connect repository
+   - Root Directory: `apps/backend`
+   - Build Command: `cd ../.. && pnpm install && pnpm build:backend`
+   - Start Command: `node dist/main.js`
+
+2. **Add Environment Variables** (same as above)
+
+3. **Deploy**
+
+### Frontend Deployment
+
+#### Recommended: Vercel or Netlify
+
+1. **Create New Project**
+   - Import repository
+   - Root Directory: `apps/frontend`
+   - Framework: Vite
+   - Build Command: `pnpm build`
+   - Output Directory: `dist`
+
+2. **Add Environment Variable**
+   - `VITE_API_URL`: Your backend URL (e.g., `https://your-backend.railway.app`)
+
+3. **Deploy**
+
+### Docker Deployment (Optional)
+
 ```bash
 cd infra/docker
 docker-compose up -d
 ```
 
-#### Manual Deployment
-```bash
-cd apps/backend
-pnpm build
-pnpm start:prod
+### Environment Variables
+
+Ensure all required environment variables are set in production:
+
+**Backend:**
+```env
+OPENAI_API_KEY=your_key_here          # Required
+GEMINI_API_KEY=your_key_here          # Optional (for fallback)
+PORT=3001
+MAX_FILE_SIZE=10485760
+EMBEDDING_MODEL=text-embedding-3-small
+CHAT_MODEL=gpt-4-turbo-preview
+GEMINI_MODEL=gemini-pro
+CACHE_MAX_SIZE=100
+CACHE_TTL_HOURS=1
+CACHE_SIMILARITY_THRESHOLD=0.9
 ```
 
-### Frontend Deployment
-
-#### Build
-```bash
-cd apps/frontend
-pnpm build
+**Frontend:**
+```env
+VITE_API_URL=https://your-backend-url.com
 ```
 
-#### Deploy
-Deploy the `dist` folder to:
-- **Vercel**: `vercel deploy`
-- **Netlify**: `netlify deploy`
-- **AWS S3**: Upload to S3 bucket
-- **Any static hosting**: Upload `dist` folder
+### Deployment Checklist
 
-#### Environment Variables
-Set `VITE_API_URL` to your backend URL
+- [ ] Backend deployed and running
+- [ ] Frontend deployed and running
+- [ ] Environment variables configured
+- [ ] CORS configured for frontend URL
+- [ ] API endpoints accessible
+- [ ] Test document upload
+- [ ] Test query functionality
+- [ ] Test cache endpoints
+- [ ] Monitor logs for errors
+
+### Troubleshooting Deployment
+
+See `VERCEL_DEPLOYMENT.md` for detailed troubleshooting guide including:
+- Monorepo package resolution issues
+- Build timeout solutions
+- Environment variable configuration
+- Alternative deployment strategies
 
 ## 🔮 Future Enhancements
 
