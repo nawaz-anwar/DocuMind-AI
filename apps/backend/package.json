@@ -11,6 +11,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1032.0",
     "@documind/shared-types": "workspace:*",
     "@documind/utils": "workspace:*",
     "@google/generative-ai": "^0.24.1",

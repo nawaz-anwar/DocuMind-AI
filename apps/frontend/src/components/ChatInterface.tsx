@@ -9,9 +9,17 @@ interface ChatInterfaceProps {
   chatHistory: ChatMessage[];
   onNewMessage: (message: ChatMessage) => void;
   hasDocuments: boolean;
+  selectedDocumentId: string | null;
+  selectedDocumentName?: string;
 }
 
-export default function ChatInterface({ chatHistory, onNewMessage, hasDocuments }: ChatInterfaceProps) {
+export default function ChatInterface({ 
+  chatHistory, 
+  onNewMessage, 
+  hasDocuments,
+  selectedDocumentId,
+  selectedDocumentName 
+}: ChatInterfaceProps) {
   const [question, setQuestion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -28,7 +36,7 @@ export default function ChatInterface({ chatHistory, onNewMessage, hasDocuments 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!question.trim() || isLoading || !hasDocuments) return;
+    if (!question.trim() || isLoading || !hasDocuments || !selectedDocumentId) return;
 
     const userQuestion = question.trim();
     setQuestion('');
@@ -40,7 +48,9 @@ export default function ChatInterface({ chatHistory, onNewMessage, hasDocuments 
     }
 
     try {
-      const response = await queryDocuments(userQuestion);
+      console.log('[QUERY] Sending query:', { question: userQuestion, documentId: selectedDocumentId });
+      const response = await queryDocuments(userQuestion, selectedDocumentId);
+      console.log('[QUERY] Received response:', response);
       
       const message: ChatMessage = {
         id: generateId(),
@@ -52,6 +62,7 @@ export default function ChatInterface({ chatHistory, onNewMessage, hasDocuments 
 
       onNewMessage(message);
     } catch (error: any) {
+      console.error('[QUERY] Error:', error);
       const errorMessage: ChatMessage = {
         id: generateId(),
         question: userQuestion,
@@ -79,6 +90,13 @@ export default function ChatInterface({ chatHistory, onNewMessage, hasDocuments 
     e.target.style.height = 'auto';
     e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
   };
+
+  const isDisabled = isLoading || !hasDocuments || !selectedDocumentId;
+  const placeholderText = !hasDocuments 
+    ? "Upload a document to start chatting"
+    : !selectedDocumentId
+    ? "Select a document from the sidebar"
+    : `Ask a question about ${selectedDocumentName || 'your document'}...`;
 
   return (
     <div className="flex flex-col h-full">
@@ -119,8 +137,8 @@ export default function ChatInterface({ chatHistory, onNewMessage, hasDocuments 
                 value={question}
                 onChange={handleTextareaChange}
                 onKeyDown={handleKeyDown}
-                placeholder={hasDocuments ? "Ask a question about your documents..." : "Upload a document to start chatting"}
-                disabled={isLoading || !hasDocuments}
+                placeholder={placeholderText}
+                disabled={isDisabled}
                 rows={1}
                 className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed resize-none"
                 style={{ maxHeight: '200px' }}
@@ -136,7 +154,7 @@ export default function ChatInterface({ chatHistory, onNewMessage, hasDocuments 
             
             <button
               type="submit"
-              disabled={isLoading || !question.trim() || !hasDocuments}
+              disabled={isDisabled || !question.trim()}
               className="p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex-shrink-0"
               aria-label="Send message"
             >
@@ -149,6 +167,16 @@ export default function ChatInterface({ chatHistory, onNewMessage, hasDocuments 
           {!hasDocuments && (
             <p className="text-xs text-gray-500 mt-2 text-center">
               Please upload a document to start asking questions
+            </p>
+          )}
+          {hasDocuments && !selectedDocumentId && (
+            <p className="text-xs text-gray-500 mt-2 text-center">
+              Please select a document from the sidebar
+            </p>
+          )}
+          {selectedDocumentName && (
+            <p className="text-xs text-gray-600 mt-2 text-center">
+              Chatting with: <span className="font-medium">{selectedDocumentName}</span>
             </p>
           )}
         </form>

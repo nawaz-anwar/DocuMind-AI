@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OpenAIProvider } from './providers/openai.provider';
 import { GeminiProvider } from './providers/gemini.provider';
+import { BedrockProvider } from './providers/bedrock.provider';
+import { MockProvider } from './providers/mock.provider';
 import { LLMProvider } from './interfaces/llm-provider.interface';
 
 @Injectable()
@@ -11,11 +13,15 @@ export class LLMOrchestratorService {
   constructor(
     private openAIProvider: OpenAIProvider,
     private geminiProvider: GeminiProvider,
+    private bedrockProvider: BedrockProvider,
+    private mockProvider: MockProvider,
   ) {
-    // Define provider priority order
+    // Define provider priority order: Bedrock → OpenAI → Gemini → Mock (for testing)
     this.providers = [
+      this.bedrockProvider,
       this.openAIProvider,
       this.geminiProvider,
+      this.mockProvider, // Fallback for testing when all APIs fail
     ];
 
     this.logProviderStatus();
@@ -38,7 +44,8 @@ export class LLMOrchestratorService {
 
     // Try each provider in order
     for (const provider of this.providers) {
-      if (!provider.isAvailable()) {
+      // Skip unavailable providers (except mock provider which is always available)
+      if (!provider.isAvailable() && provider !== this.mockProvider) {
         this.logger.warn(`[LLM] ${provider.getName()} is not available (API key not configured)`);
         continue;
       }
@@ -49,6 +56,11 @@ export class LLMOrchestratorService {
         // Validate response
         if (!response || response.trim().length === 0) {
           throw new Error('Provider returned empty response');
+        }
+
+        // Log if using demo mode
+        if (provider === this.mockProvider) {
+          this.logger.log('[LLM] Using Demo Mode (all API providers unavailable or failed)');
         }
 
         return response;
@@ -62,14 +74,14 @@ export class LLMOrchestratorService {
         const currentIndex = this.providers.indexOf(provider);
         const nextProvider = this.providers[currentIndex + 1];
         
-        if (nextProvider && nextProvider.isAvailable()) {
+        if (nextProvider) {
           this.logger.log(`[LLM] ${provider.getName()} failed → fallback to ${nextProvider.getName()}`);
         }
       }
     }
 
-    // All providers failed
-    this.logger.error('[LLM] All providers failed');
+    // All providers failed (including mock, which should never happen)
+    this.logger.error('[LLM] All providers failed including mock provider');
     
     const errorSummary = errors
       .map(e => `${e.provider}: ${e.error}`)

@@ -16,15 +16,19 @@ export class QueryService {
     private semanticCacheService: SemanticCacheService,
   ) {}
 
-  async processQuery(question: string, topK: number = 5): Promise<QueryResponse> {
+  async processQuery(question: string, documentId?: string, topK: number = 5): Promise<QueryResponse> {
     const startTime = Date.now();
 
     try {
-      this.logger.log(`Processing query: ${question}`);
+      this.logger.log(`[QUERY] Processing query: "${question}"`);
+      this.logger.log(`[QUERY] Document ID: ${documentId || 'ALL'}`);
+      this.logger.log(`[QUERY] Top K: ${topK}`);
 
       // Step 1: Check exact match cache
-      const exactMatch = this.semanticCacheService.checkExactMatch(question);
+      const cacheKey = documentId ? `${question}:${documentId}` : question;
+      const exactMatch = this.semanticCacheService.checkExactMatch(cacheKey);
       if (exactMatch.hit && exactMatch.entry) {
+        this.logger.log('[CACHE] Exact match hit');
         return {
           answer: exactMatch.entry.response,
           sources: exactMatch.entry.sources,
@@ -33,11 +37,14 @@ export class QueryService {
       }
 
       // Step 2: Generate embedding for the query
+      this.logger.log('[EMBEDDING] Generating query embedding...');
       const queryEmbedding = await this.embeddingService.generateEmbedding(question);
+      this.logger.log(`[EMBEDDING] Generated embedding with ${queryEmbedding.length} dimensions`);
 
       // Step 3: Check semantic similarity cache
       const semanticMatch = await this.semanticCacheService.checkSemanticMatch(queryEmbedding);
       if (semanticMatch.hit && semanticMatch.entry) {
+        this.logger.log('[CACHE] Semantic match hit');
         return {
           answer: semanticMatch.entry.response,
           sources: semanticMatch.entry.sources,
@@ -46,14 +53,22 @@ export class QueryService {
       }
 
       // Step 4: Cache miss - proceed with RAG pipeline
-      this.logger.log('[CACHE] Miss → calling LLM');
+      this.logger.log('[CACHE] Miss → proceeding with RAG pipeline');
 
       // Search for similar chunks
-      const searchResults = this.vectorStoreService.search(queryEmbedding, topK);
+      this.logger.log(`[VECTOR] Searching for similar chunks (topK=${topK}, documentId=${documentId || 'ALL'})...`);
+      const searchResults = this.vectorStoreService.search(queryEmbedding, topK, documentId);
+      this.logger.log(`[VECTOR] Found ${searchResults.length} relevant chunks`);
 
       if (searchResults.length === 0) {
+        const errorMsg = documentId 
+          ? 'No relevant content found in the selected document to answer your question.'
+          : 'No relevant documents found to answer your question. Please upload documents first.';
+        
+        this.logger.warn('[VECTOR] No search results found');
+        
         const response = {
-          answer: 'No relevant documents found to answer your question.',
+          answer: errorMsg,
           sources: [],
           processingTime: Date.now() - startTime,
         };
@@ -61,6 +76,11 @@ export class QueryService {
         // Don't cache empty results
         return response;
       }
+
+      // Log search results
+      searchResults.forEach((result, idx) => {
+        this.logger.log(`[VECTOR] Result ${idx + 1}: Document="${result.documentName}", Similarity=${result.similarity.toFixed(3)}`);
+      });
 
       // Prepare context and sources
       const contextChunks = searchResults.map(result => result.text);
@@ -73,13 +93,15 @@ export class QueryService {
       }));
 
       // Generate answer using LLM Orchestrator (with fallback)
+      this.logger.log('[LLM] Generating answer...');
       const answer = await this.llmOrchestrator.generateAnswer(question, contextChunks);
+      this.logger.log(`[LLM] Answer generated (${answer.length} characters)`);
 
       const processingTime = Date.now() - startTime;
-      this.logger.log(`Query processed in ${processingTime}ms`);
+      this.logger.log(`[QUERY] Completed in ${processingTime}ms`);
 
       // Step 5: Store in cache
-      this.semanticCacheService.store(question, queryEmbedding, answer, sources);
+      this.semanticCacheService.store(cacheKey, queryEmbedding, answer, sources);
 
       return {
         answer,
@@ -87,7 +109,8 @@ export class QueryService {
         processingTime,
       };
     } catch (error) {
-      this.logger.error(`Query processing failed: ${error.message}`);
+      this.logger.error(`[QUERY] Processing failed: ${error.message}`);
+      this.logger.error(`[QUERY] Stack trace: ${error.stack}`);
       throw error;
     }
   }

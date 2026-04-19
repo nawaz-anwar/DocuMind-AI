@@ -6,6 +6,10 @@ export class QueryDto {
   question: string;
 
   @IsOptional()
+  @IsString()
+  documentId?: string;
+
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(20)

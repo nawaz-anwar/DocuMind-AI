@@ -7,6 +7,9 @@ interface MessageBubbleProps {
 
 export default function MessageBubble({ message }: MessageBubbleProps) {
   const [showSources, setShowSources] = useState(false);
+  
+  // Check if this is a demo mode response
+  const isDemoMode = message.answer.includes('Demo Mode') || message.answer.includes('demo mode');
 
   return (
     <div className="space-y-4">
@@ -19,15 +22,25 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
       
       {/* AI Answer */}
       <div className="flex justify-start">
-        <div className="bg-white rounded-2xl px-4 py-3 max-w-[85%] shadow-sm border border-gray-200">
+        <div className={`rounded-2xl px-4 py-3 max-w-[85%] shadow-sm border ${
+          isDemoMode 
+            ? 'bg-blue-50 border-blue-200' 
+            : 'bg-white border-gray-200'
+        }`}>
           <div className="flex items-start gap-3">
             {/* AI Avatar */}
-            <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1 ${
+              isDemoMode
+                ? 'bg-gradient-to-br from-blue-500 to-cyan-600'
+                : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+            }`}>
               <span className="text-white text-xs font-bold">AI</span>
             </div>
             
             <div className="flex-1 min-w-0">
-              <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap break-words">
+              <p className={`text-sm leading-relaxed whitespace-pre-wrap break-words ${
+                isDemoMode ? 'text-gray-900' : 'text-gray-800'
+              }`}>
                 {message.answer}
               </p>
               

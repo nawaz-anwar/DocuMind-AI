@@ -23,9 +23,10 @@ export const uploadDocument = async (file: File): Promise<UploadDocumentResponse
   return response.data;
 };
 
-export const queryDocuments = async (question: string, topK: number = 5): Promise<QueryResponse> => {
+export const queryDocuments = async (question: string, documentId?: string, topK: number = 5): Promise<QueryResponse> => {
   const response = await apiClient.post<QueryResponse>('/query', {
     question,
+    documentId,
     topK,
   });
 

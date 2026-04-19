@@ -3,12 +3,21 @@ import { useEffect } from 'react';
 
 interface SidebarProps {
   documents: Document[];
+  selectedDocumentId: string | null;
+  onDocumentSelect: (documentId: string) => void;
   isOpen: boolean;
   onClose: () => void;
   onRefresh: () => void;
 }
 
-export default function Sidebar({ documents, isOpen, onClose, onRefresh }: SidebarProps) {
+export default function Sidebar({ 
+  documents, 
+  selectedDocumentId,
+  onDocumentSelect,
+  isOpen, 
+  onClose, 
+  onRefresh 
+}: SidebarProps) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -92,17 +101,22 @@ export default function Sidebar({ documents, isOpen, onClose, onRefresh }: Sideb
               {documents.map((doc) => (
                 <div
                   key={doc.id}
-                  className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                  onClick={() => onDocumentSelect(doc.id)}
+                  className={`p-3 border rounded-lg transition-all cursor-pointer ${
+                    selectedDocumentId === doc.id
+                      ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
+                      : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+                  }`}
                 >
                   <div className="flex items-start gap-3">
                     {/* Icon */}
                     <div className="flex-shrink-0 mt-0.5">
                       {doc.mimeType === 'application/pdf' ? (
-                        <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className={`w-5 h-5 ${selectedDocumentId === doc.id ? 'text-indigo-600' : 'text-red-500'}`} fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
                         </svg>
                       ) : (
-                        <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className={`w-5 h-5 ${selectedDocumentId === doc.id ? 'text-indigo-600' : 'text-blue-500'}`} fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
                         </svg>
                       )}
@@ -110,18 +124,33 @@ export default function Sidebar({ documents, isOpen, onClose, onRefresh }: Sideb
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-medium text-gray-800 truncate">
+                      <h3 className={`text-sm font-medium truncate ${
+                        selectedDocumentId === doc.id ? 'text-indigo-900' : 'text-gray-800'
+                      }`}>
                         {doc.originalName}
                       </h3>
-                      <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                      <div className={`flex items-center gap-2 mt-1 text-xs ${
+                        selectedDocumentId === doc.id ? 'text-indigo-600' : 'text-gray-500'
+                      }`}>
                         <span>{formatSize(doc.size)}</span>
                         <span>•</span>
                         <span>{doc.chunkCount} chunks</span>
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">
+                      <p className={`text-xs mt-1 ${
+                        selectedDocumentId === doc.id ? 'text-indigo-500' : 'text-gray-400'
+                      }`}>
                         {formatDate(doc.uploadedAt)}
                       </p>
                     </div>
+
+                    {/* Selected indicator */}
+                    {selectedDocumentId === doc.id && (
+                      <div className="flex-shrink-0">
+                        <svg className="w-5 h-5 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

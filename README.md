@@ -396,10 +396,15 @@ Deploy the `apps/frontend/dist` folder to any static hosting service (Vercel, Ne
 ### Backend
 - **Framework**: NestJS 10.3
 - **Language**: TypeScript 5.3
-- **AI/ML**: OpenAI API (Embeddings + GPT-4), Google Gemini
+- **AI/ML**: AWS Bedrock (Claude 3), OpenAI API (Embeddings + GPT-4), Google Gemini
 - **File Processing**: pdf-parse, pdf2json, multer
 - **Validation**: class-validator, class-transformer
 - **Testing**: Jest
+
+### LLM Providers (Priority Order)
+1. **AWS Bedrock** - Claude 3 Sonnet (Primary)
+2. **OpenAI** - GPT-4 Turbo (Fallback)
+3. **Google Gemini** - Gemini Pro (Fallback)
 
 ### Frontend
 - **Framework**: React 18.2
@@ -533,7 +538,7 @@ railway up
 
 #### Alternative: Vercel
 
-If deploying to Vercel, use the provided configuration:
+Vercel deployment is now fully configured with `vercel.json`:
 
 1. **Push to Git**
 ```bash
@@ -542,25 +547,23 @@ git commit -m "Deploy to Vercel"
 git push
 ```
 
-2. **Configure Vercel Project**
-   - Import your repository
-   - Root Directory: `.` (leave as root)
-   - Framework: Other
-   - Build Command: `pnpm build:backend`
-   - Output Directory: `apps/backend/dist`
-   - Install Command: `pnpm install`
+2. **Import to Vercel**
+   - Go to [vercel.com/new](https://vercel.com/new)
+   - Import your GitHub repository
+   - Vercel will automatically use `vercel.json` configuration
+   - No manual build settings needed!
 
 3. **Add Environment Variables** (in Vercel Dashboard)
    - `OPENAI_API_KEY`
    - `GEMINI_API_KEY` (optional)
-   - `PORT=3001`
-   - `CACHE_MAX_SIZE=100`
-   - `CACHE_TTL_HOURS=1`
-   - `CACHE_SIMILARITY_THRESHOLD=0.9`
+   - `PORT=3000`
+   - `NODE_ENV=production`
 
 4. **Deploy**
+   - Vercel automatically deploys on push
+   - Build command: Packages → Backend (handled by `vercel.json`)
 
-**Note**: See `VERCEL_DEPLOYMENT.md` for detailed troubleshooting.
+**Note**: The monorepo build issue has been fixed. See `VERCEL_DEPLOYMENT.md` for details.
 
 #### Alternative: Render
 

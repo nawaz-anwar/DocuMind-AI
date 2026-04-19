@@ -12,7 +12,10 @@ export class QueryController {
   @Post()
   async query(@Body() queryDto: QueryDto): Promise<QueryResponse> {
     this.logger.log(`Received query: ${queryDto.question}`);
-    return this.queryService.processQuery(queryDto.question, queryDto.topK);
+    if (queryDto.documentId) {
+      this.logger.log(`Target document: ${queryDto.documentId}`);
+    }
+    return this.queryService.processQuery(queryDto.question, queryDto.documentId, queryDto.topK);
   }
 
   @Get('cache/stats')

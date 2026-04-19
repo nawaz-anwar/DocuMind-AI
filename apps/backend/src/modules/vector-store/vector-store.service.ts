@@ -36,8 +36,19 @@ export class VectorStoreService {
     this.logger.log(`Added vector ${id} for document ${documentId}`);
   }
 
-  search(queryEmbedding: number[], topK: number = 5): Array<VectorEntry & { similarity: number }> {
-    const results = this.vectors
+  search(queryEmbedding: number[], topK: number = 5, documentId?: string): Array<VectorEntry & { similarity: number }> {
+    // Filter by documentId if provided
+    const vectorsToSearch = documentId 
+      ? this.vectors.filter(v => v.documentId === documentId)
+      : this.vectors;
+
+    if (documentId) {
+      this.logger.log(`Searching in document ${documentId} (${vectorsToSearch.length} vectors)`);
+    } else {
+      this.logger.log(`Searching across all documents (${vectorsToSearch.length} vectors)`);
+    }
+
+    const results = vectorsToSearch
       .map(vector => ({
         ...vector,
         similarity: cosineSimilarity(queryEmbedding, vector.embedding),

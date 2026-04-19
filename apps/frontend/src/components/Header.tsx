@@ -1,21 +1,29 @@
-import { ChatMessage } from '@documind/shared-types';
+import { ChatMessage, Document } from '@documind/shared-types';
 import ExportButton from './ExportButton';
+import DemoModeBadge from './DemoModeBadge';
 
 interface HeaderProps {
   onUploadClick: () => void;
   onSidebarToggle: () => void;
   documentCount: number;
   chatHistory: ChatMessage[];
+  selectedDocument?: Document;
 }
 
-export default function Header({ onUploadClick, onSidebarToggle, documentCount, chatHistory }: HeaderProps) {
+export default function Header({ 
+  onUploadClick, 
+  onSidebarToggle, 
+  documentCount, 
+  chatHistory,
+  selectedDocument 
+}: HeaderProps) {
   return (
     <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0">
       <div className="flex items-center gap-3">
         {/* Sidebar Toggle */}
         <button
           onClick={onSidebarToggle}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors lg:hidden"
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           aria-label="Toggle sidebar"
         >
           <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,9 +36,21 @@ export default function Header({ onUploadClick, onSidebarToggle, documentCount, 
           <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
             <span className="text-white text-lg font-bold">D</span>
           </div>
-          <h1 className="text-xl font-semibold text-gray-800 hidden sm:block">
-            DocuMind AI
-          </h1>
+          <div className="hidden sm:block">
+            <h1 className="text-xl font-semibold text-gray-800">
+              DocuMind AI
+            </h1>
+            {selectedDocument && (
+              <p className="text-xs text-gray-500 truncate max-w-xs">
+                {selectedDocument.originalName}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Demo Mode Badge */}
+        <div className="hidden md:block">
+          <DemoModeBadge />
         </div>
       </div>
 
@@ -38,7 +58,7 @@ export default function Header({ onUploadClick, onSidebarToggle, documentCount, 
       <div className="flex items-center gap-2">
         {/* Export Button */}
         {chatHistory.length > 0 && (
-          <ExportButton chatHistory={chatHistory} documentName="Chat Session" />
+          <ExportButton chatHistory={chatHistory} documentName={selectedDocument?.originalName || "Chat Session"} />
         )}
 
         {/* Document Count Badge */}
