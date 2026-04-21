@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "pnpm build:backend && rm -rf dist && cp -R apps/backend/dist dist",
+  "buildCommand": "pnpm -w build:backend",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": null,
   "outputDirectory": "dist"
