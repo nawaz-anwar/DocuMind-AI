@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "pnpm --filter @documind/shared-types build && pnpm --filter @documind/utils build && pnpm --filter backend build && rm -rf dist && cp -R apps/backend/dist dist",
+  "buildCommand": "pnpm build:backend && rm -rf dist && cp -R apps/backend/dist dist",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": null,
   "outputDirectory": "dist"
